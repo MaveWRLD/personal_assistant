@@ -3,6 +3,8 @@ package org.mave.personal_assistant.dto.requests;
 import lombok.Builder;
 import lombok.Data;
 import org.mave.personal_assistant.models.Task;
+import org.mave.personal_assistant.models.enums.TaskPriority;
+import org.mave.personal_assistant.models.enums.TaskStatus;
 
 import java.time.LocalDateTime;
 
@@ -15,8 +17,8 @@ public class TaskUpdateRequest {
     
     private String title;
     private String description;
-    private Task.TaskStatus status;
-    private Task.Priority priority;
+    private TaskStatus status;
+    private TaskPriority priority;
     private String assignedTo;
     private LocalDateTime dueDate;
 }

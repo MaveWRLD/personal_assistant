@@ -9,6 +9,8 @@ import org.mave.personal_assistant.dto.requests.TaskUpdateRequest;
 import org.mave.personal_assistant.exception.TaskNotFoundException;
 import org.mave.personal_assistant.exception.TaskValidationException;
 import org.mave.personal_assistant.models.Task;
+import org.mave.personal_assistant.models.enums.TaskPriority;
+import org.mave.personal_assistant.models.enums.TaskStatus;
 import org.springframework.stereotype.Service;
 
 /**
@@ -37,7 +39,7 @@ public class TaskService {
      * @return The created task
      * @throws TaskValidationException if validation fails
      */
-    public Task addTask(String title, String description, Task.Priority priority, 
+    public Task addTask(String title, String description, TaskPriority priority,
                        String assignedTo, LocalDateTime dueDate) {
         
         validateTaskCreation(title, priority);
@@ -46,9 +48,8 @@ public class TaskService {
                 .id(idGenerator.getAndIncrement())
                 .title(title)
                 .description(description)
-                .status(Task.TaskStatus.TODO)
+                .status(TaskStatus.TODO)
                 .priority(priority)
-                .assignedTo(assignedTo)
                 .dueDate(dueDate)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -109,7 +110,7 @@ public class TaskService {
      * @param priority New priority
      * @return Optional containing the updated task if found, empty otherwise
      */
-    public Optional<Task> setTaskPriority(Long id, Task.Priority priority) {
+    public Optional<Task> setTaskPriority(Long id, TaskPriority priority) {
         if (priority == null) {
             throw new TaskValidationException("Priority cannot be null");
         }
@@ -135,7 +136,7 @@ public class TaskService {
      * @param status New status
      * @return Optional containing the updated task if found, empty otherwise
      */
-    public Optional<Task> setTaskStatus(Long id, Task.TaskStatus status) {
+    public Optional<Task> setTaskStatus(Long id, TaskStatus status) {
         if (status == null) {
             throw new TaskValidationException("Status cannot be null");
         }
@@ -152,7 +153,7 @@ public class TaskService {
         return taskStorage.size();
     }
     
-    private void validateTaskCreation(String title, Task.Priority priority) {
+    private void validateTaskCreation(String title, TaskPriority priority) {
         if (title == null || title.trim().isEmpty()) {
             throw new TaskValidationException("Task title cannot be null or empty");
         }

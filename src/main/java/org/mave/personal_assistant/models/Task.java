@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import org.mave.personal_assistant.models.enums.TaskPriority;
+import org.mave.personal_assistant.models.enums.TaskStatus;
 
 import java.time.LocalDateTime;
 
@@ -17,21 +19,11 @@ public class Task {
     private String title;
     private String description;
     private TaskStatus status;
-    private Priority priority;
-    private String assignedTo;
+    private TaskPriority priority;
     private LocalDateTime dueDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    
-    public void updateStatus(TaskStatus status) {
-        this.status = status;
-        this.updatedAt = LocalDateTime.now();
-    }
-    
-    public void assignTo(String assignedTo) {
-        this.assignedTo = assignedTo;
-        this.updatedAt = LocalDateTime.now();
-    }
+
     
     public void setDueDate(LocalDateTime dueDate) {
         this.dueDate = dueDate;
@@ -40,19 +32,5 @@ public class Task {
     
     public boolean isOverdue() {
         return dueDate != null && dueDate.isBefore(LocalDateTime.now()) && status != TaskStatus.DONE;
-    }
-    
-    public enum TaskStatus {
-        TODO,
-        IN_PROGRESS,
-        DONE,
-        BLOCKED
-    }
-    
-    public enum Priority {
-        LOW,
-        MEDIUM,
-        HIGH,
-        URGENT
     }
 }
