@@ -1,1 +1,22 @@
-spring.application.name=personal_assistant
+spring:
+  application:
+    name: personal_assistant
+  
+  config:
+    import: optional:file:.env[.properties]
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5439/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+openAI:
+  apiKey: ${OPENAI_API_KEY}
