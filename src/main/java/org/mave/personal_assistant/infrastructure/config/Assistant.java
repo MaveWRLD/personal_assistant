@@ -1,8 +1,11 @@
 package org.mave.personal_assistant.infrastructure.config;
 
+import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.spring.AiService;
+
+import java.util.UUID;
 
 @AiService
 public interface Assistant {
@@ -20,5 +23,5 @@ public interface Assistant {
         Also the user might misspell words so handle typos.
         Do not assume a specific domain unless the user's request indicates it.
     """)
-    String chat(@UserMessage String message);
+    String chat(@MemoryId String memoryId, @UserMessage String message);
 }

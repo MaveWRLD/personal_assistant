@@ -1,31 +1,42 @@
 package org.mave.personal_assistant.features.communication;
 
 import lombok.RequiredArgsConstructor;
-import org.mave.personal_assistant.features.communication.AssistantService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.mave.personal_assistant.features.communication.dto.ChatRequest;
+import org.mave.personal_assistant.features.communication.dto.ChatResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/assistant")
 @RequiredArgsConstructor
 public class AssistantController {
 
-    private static final Logger log = LoggerFactory.getLogger(AssistantController.class);
     private final AssistantService assistantService;
 
     @PostMapping("/chat")
-    public String chat(@RequestBody String message) {
-        log.info("Received chat message: {}", message);
+    public ChatResponse chat(@RequestBody ChatRequest request) {
+        log.info("Received chat request for conversationId: {}, message length: {}", 
+                request.getConversationId(), 
+                request.getMessage() != null ? request.getMessage().length() : 0);
+        
         try {
-            String response = assistantService.processUserMessage(message);
-            log.info("Assistant response generated successfully");
+            ChatResponse response = assistantService.processUserMessage(
+                    request.getConversationId(),
+                    request.getMessage()
+            );
+            
+            log.info("Successfully processed chat request for conversationId: {}, response length: {}", 
+                    response.getConversationId(), 
+                    response.getResponse() != null ? response.getResponse().length() : 0);
+            
             return response;
         } catch (Exception e) {
-            log.error("Error processing chat message: {}", message, e);
+            log.error("Error processing chat request for conversationId: {}: {}", 
+                    request.getConversationId(), e.getMessage(), e);
             throw e;
         }
     }
