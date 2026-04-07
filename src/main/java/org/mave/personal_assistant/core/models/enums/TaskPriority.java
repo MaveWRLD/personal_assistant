@@ -1,4 +1,4 @@
-package org.mave.personal_assistant.core.domain.enums;
+package org.mave.personal_assistant.core.models.enums;
 
 public enum TaskPriority {
     LOW,

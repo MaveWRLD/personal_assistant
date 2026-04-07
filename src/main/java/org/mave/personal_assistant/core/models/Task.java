@@ -1,11 +1,11 @@
-package org.mave.personal_assistant.core.domain;
+package org.mave.personal_assistant.core.models;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.mave.personal_assistant.core.domain.enums.TaskPriority;
-import org.mave.personal_assistant.core.domain.enums.TaskStatus;
+import org.mave.personal_assistant.core.models.enums.TaskPriority;
+import org.mave.personal_assistant.core.models.enums.TaskStatus;
 
 import java.time.LocalDateTime;
 
