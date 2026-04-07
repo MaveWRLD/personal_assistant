@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.mave.personal_assistant.core.domain.enums.TaskPriority;
-import org.mave.personal_assistant.core.domain.enums.TaskStatus;
+import org.mave.personal_assistant.core.models.enums.TaskPriority;
+import org.mave.personal_assistant.core.models.enums.TaskStatus;
 
 import java.time.LocalDateTime;
 

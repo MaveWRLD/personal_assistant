@@ -2,28 +2,27 @@ package org.mave.personal_assistant.features.task_management;
 
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.mave.personal_assistant.features.task_management.dto.TaskCreateRequest;
 import org.mave.personal_assistant.features.task_management.dto.TaskResponse;
 import org.mave.personal_assistant.features.task_management.dto.TaskSearchRequest;
 import org.mave.personal_assistant.features.task_management.dto.TaskUpdateRequest;
-import org.mave.personal_assistant.core.domain.Task;
-import org.mave.personal_assistant.core.domain.enums.TaskPriority;
-import org.mave.personal_assistant.core.domain.enums.TaskStatus;
+import org.mave.personal_assistant.core.models.enums.TaskPriority;
+import org.mave.personal_assistant.core.models.enums.TaskStatus;
 import org.mave.personal_assistant.shared.exception.TaskNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-@Service
-@RequiredArgsConstructor
+@Slf4j
+@Component
+@AllArgsConstructor
 public class TaskManagementTool {
 
-    private static final Logger log = LoggerFactory.getLogger(TaskManagementTool.class);
     private final TaskService taskService;
 
     @Tool("Get current date and time")
@@ -39,7 +38,7 @@ public class TaskManagementTool {
         Required: title, dueDate (use parseDate tool first if needed), priority.
         Optional: description, status.
     """)
-    public String addTask(
+    public TaskResponse addTask(
             @P("The clear title of task") String title,
             @P("Due date -  REQUIRED") LocalDateTime dueDate,
             @P("Priority: HIGH, MEDIUM, or LOW") String priority,
@@ -49,51 +48,42 @@ public class TaskManagementTool {
         log.info("Tool addTask called → title={}, dueDate={}, priority={}, description={}",
                 title, dueDate, priority, description);
 
-        TaskCreateRequest request = new TaskCreateRequest();
-        request.setTitle(title);
-        request.setDueDate(dueDate);
-        request.setPriority(TaskPriority.valueOf(priority != null ? priority.toUpperCase() : "MEDIUM"));
-
-        if (description != null && !description.trim().isEmpty()) {
-            request.setDescription(description);
-        }
-        if (status != null && !status.trim().isEmpty()) {
-            request.setStatus(TaskStatus.valueOf(status.toUpperCase()));
-        }
-
         try {
-            var created = taskService.createTask(request);
-            return "✅ Task created successfully!\n" +
-                    "Title: " + created.getTitle() + "\n" +
-                    "Due Date: " + dueDate + "\n" +
-                    "Priority: " + request.getPriority() + "\n" +
-                    "ID: " + created.getId();
+            TaskCreateRequest request = TaskCreateRequest.builder()
+                    .title(title)
+                    .dueDate(dueDate)
+                    .priority(TaskPriority.valueOf(priority != null ? priority.toUpperCase() : "MEDIUM"))
+                    .description(description)
+                    .status(status != null && !status.trim().isEmpty() ? TaskStatus.valueOf(status.toUpperCase()) : null)
+                    .build();
+            
+            return taskService.createTask(request);
         } catch (Exception e) {
             log.error("Failed to create task", e);
-            return "❌ Failed to create task: " + e.getMessage();
+            throw new RuntimeException("Failed to create task: " + e.getMessage(), e);
         }
     }
 
     @Tool("Get all tasks")
     public List<TaskResponse> getAllTasks() {
-        log.info("Tool getAllTasks called");
-        try {
-            return taskService.getAllTasks();
-        } catch (Exception e) {
-            log.error("Failed to get all tasks", e);
-            return List.of();
-        }
+        log.debug("Getting all tasks");
+        List<TaskResponse> tasks = taskService.getAllTasks();
+        return tasks != null ? tasks : List.of();
     }
 
-    @Tool("Get a specific task by its ID")
-    public TaskResponse getTaskById(@P("The ID of the task to retrieve") Long id) {
-        log.info("Tool getTaskById called with id: {}", id);
+    @Tool("""
+        Get a specific task by its ID.
+        If the task exists, returns the task details as JSON object.
+        If the task does not exist, returns null.
+        """)
+    public Optional<TaskResponse> getTaskById(
+            @P("The ID of the task to retrieve. It should be a positive Long number.") Long id) {
+        
+        log.debug("Getting task with ID: {}", id);
         try {
-
-            return taskService.getTaskById(id);
-        } catch (Exception e) {
-            log.error("Failed to get task with id: {}", id, e);
-            return null;
+            return Optional.ofNullable(taskService.getTaskById(id));
+        } catch (TaskNotFoundException e) {
+            return Optional.empty();
         }
     }
 
@@ -133,40 +123,25 @@ public class TaskManagementTool {
 
 
     @Tool("Delete a task by its ID")
-    public String deleteTask(@P("The ID of the task to delete") Long id) {
-        log.info("Tool deleteTask called with id: {}", id);
-        try {
-            boolean deleted = taskService.deleteTask(id);
-            if (deleted) {
-                return "✅ Task with ID " + id + " has been successfully deleted.";
-            } else {
-                return "⚠️ Task with ID " + id + " was not found.";
-            }
-        } catch (Exception e) {
-            log.error("Failed to delete task with id: {}", id, e);
-            return "❌ Failed to delete task: " + e.getMessage();
-        }
+    public boolean deleteTask(@P("The ID of the task to delete") Long id) {
+        log.info("Tool deleteTask called → id={}", id);
+        return taskService.deleteTask(id);
     }
 
     @Tool("""
-    Update an existing task.
-    
-    Provide the task ID and any fields you want to update:
-    - title: New title for the task
-    - description: New description
-    - status: TODO, IN_PROGRESS, or DONE
-    - priority: HIGH, MEDIUM, or LOW
-    - dueDate: New due date in LocalDateTime format
-    """)
-    public TaskResponse updateTask(
-            @P("The ID of the task to update") Long id,
-            @P("New title for the task (optional)") String title,
-            @P("New description for the task (optional)") String description,
-            @P("New status: TODO, IN_PROGRESS, or DONE (optional)") String status,
-            @P("New priority: HIGH, MEDIUM, or LOW (optional)") String priority,
-            @P("New due date (optional)") LocalDateTime dueDate) {
+        Update an existing task.
+        Required: id.
+        Optional: title, description, status, priority, dueDate.
+        """)
+    public Optional<TaskResponse> updateTask(
+            @P("The ID of the task to update - REQUIRED") Long id,
+            @P("New title for the task - optional") String title,
+            @P("New description for the task - optional") String description,
+            @P("New status: TODO, IN_PROGRESS, or DONE - optional") String status,
+            @P("New priority: HIGH, MEDIUM, or LOW - optional") String priority,
+            @P("New due date - optional") LocalDateTime dueDate) {
 
-        log.info("Tool updateTask called with id: {}, title: {}, status: {}, priority: {}",
+        log.info("Tool updateTask called → id={}, title={}, status={}, priority={}",
                 id, title, status, priority);
 
         TaskUpdateRequest updateRequest = TaskUpdateRequest.builder()
@@ -177,35 +152,15 @@ public class TaskManagementTool {
                 .dueDate(dueDate)
                 .build();
 
-        return taskService.updateTask(id, updateRequest)
-                .orElseThrow(() -> new TaskNotFoundException("Task with ID " + id + " not found"));
+        return taskService.updateTask(id, updateRequest);
     }
 
 
-    @Tool("Get the total number of tasks")
+    @Tool("Get the total count of tasks")
     public String getTaskCount() {
-        log.info("Tool getTaskCount called");
-        try {
-            long count = taskService.getTaskCount();
-            return "📊 Total number of tasks: " + count;
-        } catch (Exception e) {
-            log.error("Failed to get task count", e);
-            return "❌ Failed to get task count: " + e.getMessage();
-        }
-    }
-
-    private String getUpdatedFields(TaskUpdateRequest request) {
-        StringBuilder fields = new StringBuilder();
-        if (request.getTitle() != null) fields.append("title, ");
-        if (request.getDescription() != null) fields.append("description, ");
-        if (request.getStatus() != null) fields.append("status, ");
-        if (request.getPriority() != null) fields.append("priority, ");
-        if (request.getDueDate() != null) fields.append("dueDate, ");
-        
-        if (!fields.isEmpty()) {
-            return fields.substring(0, fields.length() - 2);
-        }
-        return "none";
+        log.debug("Getting task count");
+        long count = taskService.getTaskCount();
+        return "Total tasks: " + count;
     }
 
     @Tool("""

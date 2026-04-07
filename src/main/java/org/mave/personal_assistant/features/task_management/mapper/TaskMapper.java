@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.mave.personal_assistant.core.domain.Task;
+import org.mave.personal_assistant.core.models.Task;
 import org.mave.personal_assistant.features.task_management.dto.TaskCreateRequest;
 import org.mave.personal_assistant.features.task_management.dto.TaskResponse;
 import org.mave.personal_assistant.features.task_management.dto.TaskUpdateRequest;

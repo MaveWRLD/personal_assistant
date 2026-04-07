@@ -1,13 +1,12 @@
 package org.mave.personal_assistant.features.task_management;
 
 import lombok.RequiredArgsConstructor;
-import org.mave.personal_assistant.core.domain.Task;
-import org.mave.personal_assistant.core.domain.enums.TaskPriority;
+import org.mave.personal_assistant.core.models.enums.TaskPriority;
 import org.mave.personal_assistant.features.task_management.dto.TaskCreateRequest;
 import org.mave.personal_assistant.features.task_management.dto.TaskResponse;
 import org.mave.personal_assistant.features.task_management.dto.TaskSearchRequest;
 import org.mave.personal_assistant.features.task_management.dto.TaskUpdateRequest;
-import org.mave.personal_assistant.core.domain.enums.TaskStatus;
+import org.mave.personal_assistant.core.models.enums.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;

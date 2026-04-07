@@ -1,8 +1,8 @@
 package org.mave.personal_assistant.features.task_management;
 
-import org.mave.personal_assistant.core.domain.Task;
-import org.mave.personal_assistant.core.domain.enums.TaskPriority;
-import org.mave.personal_assistant.core.domain.enums.TaskStatus;
+import org.mave.personal_assistant.core.models.Task;
+import org.mave.personal_assistant.core.models.enums.TaskPriority;
+import org.mave.personal_assistant.core.models.enums.TaskStatus;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
