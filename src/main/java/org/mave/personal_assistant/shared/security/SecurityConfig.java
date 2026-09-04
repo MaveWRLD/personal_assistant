@@ -34,7 +34,7 @@ public class SecurityConfig {
                                 "/css/**",
                                 "/js/**"
                         ).permitAll()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .formLogin(Customizer.withDefaults())
                 .logout(Customizer.withDefaults());
